@@ -1,4 +1,4 @@
-import { Action } from 'redux'
+import { ThunkDispatch } from 'redux-thunk'
 
 // Subset of the properties available on an individual search result.
 // An exhaustive set of all properties is not necessary to build this application.
@@ -116,6 +116,61 @@ export function searchClear(): SearchActionTypes {
   return { type: ActionTypes.SearchClear }
 }
 
+/**
+ * Thunk action to call the Algolia API and update the store state.
+ *
+ * @param text Text to use as the query to the Algolia API
+ * @param pageIdx Page index to request for the given search string. Defaulted to 0.
+ */
+export function search(text: string, pageIdx: number = 0) {
+  return async (dispatch: ThunkDispatch<{}, {}, any>) => {
+    if (!text.length) {
+      dispatch(searchClear())
+    } else {
+      dispatch(searchStart(text))
+
+      try {
+        const resp = await fetch(`http://hn.algolia.com/api/v1/search?query=${text}&tags=story&page=${pageIdx}`)
+        if (resp.ok) {
+          const response = await resp.json()
+
+          dispatch(searchComplete(response.hits, response.page, response.nbHits, response.nbPages, response.query))
+        } else {
+          dispatch(searchError(resp.statusText))
+        }
+      } catch (err) {
+        dispatch(searchError(err.message || 'Error while searching'))
+      }
+    }
+  }
+}
+
+/**
+ * Thunk action to calculate the next page index and perform a search.
+ */
+export function nextPage() {
+  return async (dispatch: ThunkDispatch<{}, {}, any>, getState: () => IHnSearchState) => {
+    const state = getState()
+    const nextPageIdx = selectCurrentPage(state) + 1
+    const searchText = selectSearchText(state)
+
+    dispatch(search(searchText, nextPageIdx))
+  }
+}
+
+/**
+ * Thunk action to calculate the previous page index and perform a search.
+ */
+export function prevPage() {
+  return async (dispatch: ThunkDispatch<{}, {}, any>, getState: () => IHnSearchState) => {
+    const state = getState()
+    const prevPageIdx = selectCurrentPage(state) - 1
+    const searchText = selectSearchText(state)
+
+    dispatch(search(searchText, prevPageIdx))
+  }
+}
+
 // Selector functions.
 export const selectSearchResults = (state: IHnSearchState) => state.response.hits
 
@@ -124,3 +179,7 @@ export const selectIsSearching = (state: IHnSearchState) => state.isSearching
 export const selectHasNextPage = (state: IHnSearchState) => state.response.page < state.response.nbPages - 1
 
 export const selectHasPrevPage = (state: IHnSearchState) => state.response.page > 0
+
+export const selectCurrentPage = (state: IHnSearchState) => state.response.page
+
+export const selectSearchText = (state: IHnSearchState) => state.text

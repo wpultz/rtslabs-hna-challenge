@@ -1,7 +1,16 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
 
-import { useHnSearch } from './hooks/hnSearch/useHnSearch'
 import { useDebounceValue } from './hooks/debounceValue/useDebounceValue'
+import {
+  search,
+  nextPage,
+  prevPage,
+  selectSearchResults,
+  selectIsSearching,
+  selectHasNextPage,
+  selectHasPrevPage,
+} from './store/hnSearch/hnSearch'
 
 import styles from './App.module.css'
 
@@ -9,11 +18,18 @@ function App() {
   // State for the search text in the text input.
   const [searchText, setSearchText] = useState('')
 
+  const dispatch = useDispatch()
+  const searchResults = useSelector(selectSearchResults)
+  const isSearching = useSelector(selectIsSearching)
+  const hasNext = useSelector(selectHasNextPage)
+  const hasPrev = useSelector(selectHasPrevPage)
+
   // Debounce value to be used in the actual search calls
   const debouncedSearchText = useDebounceValue(searchText, 500)
 
-  // HN search hook. Search text in, results and status out.
-  const { searchResults, isSearching, next, prev } = useHnSearch(debouncedSearchText)
+  useEffect(() => {
+    dispatch(search(debouncedSearchText))
+  }, [debouncedSearchText])
 
   return (
     <div className={styles.app}>
@@ -39,8 +55,8 @@ function App() {
           )
         })}
         <div className="u-flex u-flexJustifyEnd">
-          {prev && <button onClick={prev}>Previous</button>}
-          {next && <button onClick={next}>Next</button>}
+          {hasPrev && <button onClick={() => dispatch(prevPage())}>Previous</button>}
+          {hasNext && <button onClick={() => dispatch(nextPage())}>Next</button>}
         </div>
       </div>
     </div>
