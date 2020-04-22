@@ -1,0 +1,20 @@
+.app {
+  width: 100%;
+  max-width: 1000px;
+  margin: auto;
+}
+
+.main {
+  margin: 10px;
+}
+
+.result {
+  border: 1px solid black;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  padding: 10px;
+}
+
+.result:first-of-type {
+  margin-top: 10px;
+}

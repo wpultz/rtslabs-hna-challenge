@@ -1,26 +1,46 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from 'react'
+
+import { useHnSearch } from './hooks/hnSearch/useHnSearch'
+import { useDebounceValue } from './hooks/debounceValue/useDebounceValue'
+
+import styles from './App.module.css'
 
 function App() {
+  // State for the search text in the text input.
+  const [searchText, setSearchText] = useState('')
+
+  // Debounce value to be used in the actual search calls
+  const debouncedSearchText = useDebounceValue(searchText, 500)
+
+  // HN search hook. Search text in, results and status out.
+  const [searchResults, isSearching] = useHnSearch(debouncedSearchText)
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className={styles.app}>
+      <div className={styles.main}>
+        <form className="u-flex" onSubmit={(e) => e.preventDefault()}>
+          <input
+            type="text"
+            onChange={(e) => setSearchText(e.target.value)}
+            value={searchText}
+            className="u-flexGrow1"
+            disabled={isSearching}
+            placeholder="Type to search Hacker News"
+          />
+        </form>
+        {searchResults.map((res) => {
+          return (
+            <article key={res.objectID} className={styles.result}>
+              <h1>{res.title}</h1>
+              <p>
+                <i>Authored by {res.author}</i>
+              </p>
+            </article>
+          )
+        })}
+      </div>
     </div>
-  );
+  )
 }
 
-export default App;
+export default App
