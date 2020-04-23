@@ -13,7 +13,7 @@ function App() {
   const debouncedSearchText = useDebounceValue(searchText, 500)
 
   // HN search hook. Search text in, results and status out.
-  const [searchResults, isSearching] = useHnSearch(debouncedSearchText)
+  const { searchResults, isSearching, next, prev } = useHnSearch(debouncedSearchText)
 
   return (
     <div className={styles.app}>
@@ -38,6 +38,10 @@ function App() {
             </article>
           )
         })}
+        <div className="u-flex u-flexJustifyEnd">
+          {prev && <button onClick={prev}>Previous</button>}
+          {next && <button onClick={next}>Next</button>}
+        </div>
       </div>
     </div>
   )

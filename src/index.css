@@ -25,3 +25,11 @@ code {
 .u-flexGrow1 {
   flex: 1 !important;
 }
+
+.u-flexBetween {
+  justify-content: space-between;
+}
+
+.u-flexJustifyEnd {
+  justify-content: flex-end;
+}

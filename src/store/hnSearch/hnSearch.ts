@@ -17,6 +17,7 @@ interface ISearchResponse {
   nbHits: number
   nbPages: number
   [key: string]: any
+  query: string
 }
 
 // Aliased subset of the properties available in a search results response.
@@ -38,6 +39,7 @@ const defaultState: IHnSearchState = {
     page: 0,
     nbHits: 0,
     nbPages: 0,
+    query: '',
   },
 }
 
@@ -97,11 +99,12 @@ export function searchComplete(
   hits: ISearchResult[],
   page: number,
   nbHits: number,
-  nbPages: number
+  nbPages: number,
+  query: string
 ): SearchActionTypes {
   return {
     type: ActionTypes.SearchComplete,
-    payload: { hits, page, nbHits, nbPages },
+    payload: { hits, page, nbHits, nbPages, query },
   }
 }
 
@@ -117,3 +120,7 @@ export function searchClear(): SearchActionTypes {
 export const selectSearchResults = (state: IHnSearchState) => state.response.hits
 
 export const selectIsSearching = (state: IHnSearchState) => state.isSearching
+
+export const selectHasNextPage = (state: IHnSearchState) => state.response.page < state.response.nbPages - 1
+
+export const selectHasPrevPage = (state: IHnSearchState) => state.response.page > 0
